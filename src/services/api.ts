@@ -1,7 +1,20 @@
 import axios from 'axios';
 import { Project, Scene, VideoTemplate, GenerationProgress, AppSettings } from '../types';
 
-const API_BASE = '/api';
+/**
+ * Construct API base URL using VITE_API_URL environment variable.
+ * Ensures the route paths cleanly target the Render Express backend /api routes.
+ */
+const getApiBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || envUrl.trim() === '') {
+    return '/api';
+  }
+  const cleanUrl = envUrl.trim().replace(/\/+$/, '');
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
+const API_BASE = getApiBaseUrl();
 
 export const api = {
   // Video Generation

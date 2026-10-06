@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Film, Sparkles, Clock, Wand2, ArrowRight, Play, CheckCircle2 } from 'lucide-react';
 import { api } from '../services/api';
 import { Project, VideoTemplate } from '../types';
+import { getMediaUrl } from '../utils/mediaUrl';
 
 interface DashboardViewProps {
   onNavigate: (tab: string, projectId?: string) => void;
@@ -125,7 +126,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               >
                 <div className="aspect-video bg-black rounded-xl overflow-hidden mb-3 relative border border-white/5">
                   {project.thumbnailUrl ? (
-                    <img src={project.thumbnailUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img src={getMediaUrl(project.thumbnailUrl)} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-600">
                       <Film className="w-8 h-8" />

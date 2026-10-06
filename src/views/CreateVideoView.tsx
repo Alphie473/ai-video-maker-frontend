@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Sparkles, Upload, FileText, Wand2, Film, Music, Mic, Layers, CheckCircle2, Loader2, Play } from 'lucide-react';
 import { api } from '../services/api';
 import { GenerationProgress } from '../types';
+import { formatError } from '../utils/formatError';
 
 interface CreateVideoViewProps {
   onVideoCreated: (projectId: string) => void;
@@ -108,7 +109,7 @@ export const CreateVideoView: React.FC<CreateVideoViewProps> = ({ onVideoCreated
 
     } catch (err: any) {
       setIsGenerating(false);
-      setError(err.response?.data?.error || 'Failed to start video generation');
+      setError(formatError(err) || 'Failed to start video generation');
     }
   };
 
@@ -285,7 +286,7 @@ export const CreateVideoView: React.FC<CreateVideoViewProps> = ({ onVideoCreated
       {/* Error Banner */}
       {error && (
         <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-center gap-2">
-          <span>⚠️ {error}</span>
+          <span>⚠️ {formatError(error)}</span>
         </div>
       )}
 

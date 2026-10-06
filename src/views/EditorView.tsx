@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RefreshCw, Download, Image as ImageIcon, Volume2, Mic, Music, Plus, Trash2, Film, Sparkles, Sliders, Type, ArrowRightLeft, Camera, Check, Loader2, Maximize2 } from 'lucide-react';
 import { api } from '../services/api';
 import { Project, Scene } from '../types';
+import { getMediaUrl } from '../utils/mediaUrl';
+import { formatError } from '../utils/formatError';
 
 interface EditorViewProps {
   projectId: string;
@@ -206,14 +208,14 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
               {project.videoUrl ? (
                 <video
                   ref={videoRef}
-                  src={project.videoUrl}
+                  src={getMediaUrl(project.videoUrl)}
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={() => setIsPlaying(false)}
                   className="w-full h-full object-cover"
                 />
               ) : selectedScene?.visualUrl ? (
                 <img
-                  src={selectedScene.visualUrl}
+                  src={getMediaUrl(selectedScene.visualUrl)}
                   alt={selectedScene.prompt}
                   className="w-full h-full object-cover"
                 />
@@ -395,7 +397,7 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
                 {/* Scene Thumbnail */}
                 <div className="aspect-video bg-black rounded-xl overflow-hidden mb-2.5 relative border border-white/5">
                   {scene.visualUrl ? (
-                    <img src={scene.visualUrl} alt={scene.prompt} className="w-full h-full object-cover" />
+                    <img src={getMediaUrl(scene.visualUrl)} alt={scene.prompt} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-600">
                       <ImageIcon className="w-6 h-6" />
@@ -460,7 +462,7 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
               </button>
 
               <a
-                href={project.videoUrl || '#'}
+                href={getMediaUrl(project.videoUrl) || '#'}
                 download={`${project.title.replace(/\s+/g, '_')}.mp4`}
                 className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
               >
