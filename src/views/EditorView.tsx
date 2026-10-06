@@ -27,6 +27,8 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
   const [sceneImagePrompt, setSceneImagePrompt] = useState('');
   const [sceneCameraEffect, setSceneCameraEffect] = useState('pan-right');
 
+  const [videoError, setVideoError] = useState(false);
+
   useEffect(() => {
     fetchProject();
   }, [projectId]);
@@ -34,6 +36,7 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
   const fetchProject = async () => {
     try {
       setIsLoading(true);
+      setVideoError(false);
       const data = await api.getProjectById(projectId);
       setProject(data);
       if (data.scenes && data.scenes.length > 0) {
@@ -56,13 +59,22 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
     setSceneCameraEffect(scene.cameraEffect || 'pan-right');
   };
 
-  const handleTogglePlay = () => {
-    if (videoRef.current) {
+  const handleTogglePlay = async () => {
+    if (videoRef.current && isRealVideo && !videoError) {
       if (isPlaying) {
         videoRef.current.pause();
+        setIsPlaying(false);
       } else {
-        videoRef.current.play();
+        try {
+          await videoRef.current.play();
+          setIsPlaying(true);
+        } catch (err: any) {
+          console.warn('Video playback notice:', err?.message || err);
+          setIsPlaying(false);
+          setVideoError(true);
+        }
       }
+    } else {
       setIsPlaying(!isPlaying);
     }
   };
@@ -73,6 +85,13 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
       setDuration(videoRef.current.duration || project?.duration || 0);
     }
   };
+
+  const rawVideoUrl = project?.videoUrl ? getMediaUrl(project.videoUrl) : null;
+  const isRealVideo = Boolean(
+    rawVideoUrl &&
+    !videoError &&
+    (rawVideoUrl.endsWith('.mp4') || rawVideoUrl.endsWith('.webm') || rawVideoUrl.endsWith('.mov'))
+  );
 
   // Regenerate single scene prompt & visual
   const handleRegenerateScene = async () => {
@@ -205,18 +224,23 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
             
             {/* Video Player Box */}
             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden flex items-center justify-center shadow-2xl border border-white/5">
-              {project.videoUrl ? (
+              {isRealVideo ? (
                 <video
                   ref={videoRef}
-                src={project.videoUrl?.startsWith('http') ? project.videoUrl : `${(import.meta as any).env.VITE_API_URL || ''}${project.videoUrl}`}
+                  src={rawVideoUrl!}
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={() => setIsPlaying(false)}
+                  onError={() => {
+                    console.warn('HTML5 Video element failed to load source, switching to preview display');
+                    setVideoError(true);
+                    setIsPlaying(false);
+                  }}
                   className="w-full h-full object-cover"
                 />
-              ) : selectedScene?.visualUrl ? (
+              ) : selectedScene?.visualUrl || project.thumbnailUrl ? (
                 <img
-                  src={getMediaUrl(selectedScene.visualUrl)}
-                  alt={selectedScene.prompt}
+                  src={getMediaUrl(selectedScene?.visualUrl || project.thumbnailUrl)}
+                  alt={selectedScene?.prompt || project.title}
                   className="w-full h-full object-cover"
                 />
               ) : (
