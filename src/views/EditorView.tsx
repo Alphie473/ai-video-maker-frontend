@@ -208,7 +208,7 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
               {project.videoUrl ? (
                 <video
                   ref={videoRef}
-                  src={getMediaUrl(project.videoUrl)}
+                src={project.videoUrl?.startsWith('http') ? project.videoUrl : `${(import.meta as any).env.VITE_API_URL || ''}${project.videoUrl}`}
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={() => setIsPlaying(false)}
                   className="w-full h-full object-cover"
