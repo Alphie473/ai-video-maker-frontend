@@ -228,6 +228,9 @@ export const EditorView: React.FC<EditorViewProps> = ({ projectId }) => {
                 <video
                   ref={videoRef}
                   src={rawVideoUrl!}
+                  crossOrigin="anonymous"
+                  preload="metadata"
+                  playsInline
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={() => setIsPlaying(false)}
                   onError={() => {

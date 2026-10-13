@@ -95,7 +95,14 @@ export const CreateVideoView: React.FC<CreateVideoViewProps> = ({ onVideoCreated
           const statusRes = await api.getGenerationProgress(projectId);
           setProgress(statusRes);
 
-          if (statusRes.percent >= 100) {
+          if (statusRes.renderStatus === 'failed') {
+            clearInterval(interval);
+            setIsGenerating(false);
+            setError(statusRes.step || 'Video generation failed. Please check the logs.');
+            return;
+          }
+
+          if (statusRes.percent >= 100 || statusRes.renderStatus === 'completed') {
             clearInterval(interval);
             setTimeout(() => {
               setIsGenerating(false);
