@@ -83,14 +83,19 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Google Gemini API Key (Gemini 1.5 Flash Scripting)</label>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                Google Gemini / Veo API Key (Gemini 1.5 Flash Scripting & Veo 3.1 Video)
+              </label>
               <input
                 type="password"
                 value={settings.geminiApiKey || ''}
                 onChange={(e) => setSettings({ ...settings, geminiApiKey: e.target.value })}
-                placeholder="AIzaSy..."
+                placeholder="AIzaSy... or AQ..."
                 className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-mono"
               />
+              <span className="text-[10px] text-slate-400 mt-0.5 block">
+                Veo 3.1 text-to-video generation requires pay-as-you-go billing enabled in Google AI Studio / GCP.
+              </span>
             </div>
 
             <div>
@@ -105,12 +110,27 @@ export const SettingsView: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Replicate / Fal.ai API Key (Text-to-Video Models)</label>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                Replicate API Key (Minimax Video-01 / Kling / Zeroscope Video Diffusion)
+              </label>
               <input
                 type="password"
                 value={settings.replicateApiKey || ''}
                 onChange={(e) => setSettings({ ...settings, replicateApiKey: e.target.value })}
                 placeholder="r8_..."
+                className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                Fal.ai API Key (Minimax / Kling / Luma Video Diffusion)
+              </label>
+              <input
+                type="password"
+                value={settings.falApiKey || ''}
+                onChange={(e) => setSettings({ ...settings, falApiKey: e.target.value })}
+                placeholder="fal_key_..."
                 className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-mono"
               />
             </div>
