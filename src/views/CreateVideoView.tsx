@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { Sparkles, Upload, FileText, Wand2, Film, Music, Mic, Layers, CheckCircle2, Loader2, Play } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Sparkles, Upload, FileText, Wand2, Film, Music, Mic, Layers, CheckCircle2, Loader2, Play, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { api } from '../services/api';
-import { GenerationProgress } from '../types';
+import { GenerationProgress, AppSettings } from '../types';
 import { formatError } from '../utils/formatError';
 
 interface CreateVideoViewProps {
@@ -20,6 +20,11 @@ export const CreateVideoView: React.FC<CreateVideoViewProps> = ({ onVideoCreated
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState<GenerationProgress>({ projectId: '', percent: 0, step: 'Initializing AI Pipeline...' });
   const [error, setError] = useState<string | null>(null);
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
+
+  useEffect(() => {
+    api.getSettings().then(setAppSettings).catch(console.error);
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -296,6 +301,44 @@ export const CreateVideoView: React.FC<CreateVideoViewProps> = ({ onVideoCreated
           <span>⚠️ {formatError(error)}</span>
         </div>
       )}
+
+      {/* Google Veo 3.1 Estimated Cost & Guardrails Card */}
+      <div className="mb-6 p-4 rounded-2xl bg-dark-900/80 border border-white/10 backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-semibold text-white">Google Veo 3.1 Cost Protection</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+              {(appSettings?.strictVideoMode ?? true) ? 'Strict Video Mode Active' : 'Fallback Allowed'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <span className="text-slate-400">
+              Guardrail: <strong className="text-white">{appSettings?.maxScenesPerRequest ?? 3} scenes</strong> (max {appSettings?.maxDurationPerScene ?? 5}s/scene)
+            </span>
+            <span className="text-slate-400">
+              Est. Cost: <strong className={((appSettings?.maxScenesPerRequest ?? 3) * (appSettings?.maxDurationPerScene ?? 5) * (appSettings?.veoPricePerSecond ?? 0.15)) > (appSettings?.maxCostPerRequest ?? 1.50) ? 'text-red-400' : 'text-emerald-400'}>
+                ${((appSettings?.maxScenesPerRequest ?? 3) * (appSettings?.maxDurationPerScene ?? 5) * (appSettings?.veoPricePerSecond ?? 0.15)).toFixed(2)}
+              </strong>
+              <span className="text-[10px] text-slate-500 ml-1">/ limit ${(appSettings?.maxCostPerRequest ?? 1.50).toFixed(2)}</span>
+            </span>
+          </div>
+        </div>
+
+        {((appSettings?.maxScenesPerRequest ?? 3) * (appSettings?.maxDurationPerScene ?? 5) * (appSettings?.veoPricePerSecond ?? 0.15)) > (appSettings?.maxCostPerRequest ?? 1.50) && (
+          <div className="mt-3 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0 text-red-400" />
+            <span>
+              <strong>Budget Warning:</strong> Estimated cost (${((appSettings?.maxScenesPerRequest ?? 3) * (appSettings?.maxDurationPerScene ?? 5) * (appSettings?.veoPricePerSecond ?? 0.15)).toFixed(2)}) exceeds your configured spending limit (${(appSettings?.maxCostPerRequest ?? 1.50).toFixed(2)}). Please reduce scene limits or adjust budget ceiling in Settings before generating.
+            </span>
+          </div>
+        )}
+
+        <p className="text-[10px] text-slate-500 mt-2">
+          *Disclosed limitation: Pricing is an estimate based on published rates (${(appSettings?.veoPricePerSecond ?? 0.15).toFixed(2)}/sec) and cannot guarantee actual final provider charges. Strict Video Mode blocks silent fallback to static image slideshows.
+        </p>
+      </div>
 
       {/* Action CTA Button */}
       <div className="text-center">

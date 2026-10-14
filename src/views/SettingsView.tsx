@@ -12,7 +12,12 @@ export const SettingsView: React.FC = () => {
     falApiKey: '',
     defaultResolution: '1080p',
     defaultFps: 30,
-    enableAiMockFallback: true
+    enableAiMockFallback: true,
+    maxScenesPerRequest: 3,
+    maxDurationPerScene: 5,
+    maxCostPerRequest: 1.50,
+    veoPricePerSecond: 0.15,
+    strictVideoMode: true
   });
 
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -133,6 +138,107 @@ export const SettingsView: React.FC = () => {
                 placeholder="fal_key_..."
                 className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-mono"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Google Veo 3.1 Budget Guardrails & Safety Controls */}
+        <div className="glass-panel p-6 rounded-3xl border border-white/10">
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldCheck className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-bold text-white">Google Veo 3.1 Budget Guardrails & Safety Controls</h2>
+          </div>
+          <p className="text-xs text-slate-400 mb-6">
+            Prevent unexpected API charges and enforce strict video output standards before sending requests to Google Veo 3.1.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                Max Scenes Per Request (1–10)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={settings.maxScenesPerRequest ?? 3}
+                onChange={(e) => setSettings({ ...settings, maxScenesPerRequest: parseInt(e.target.value, 10) || 1 })}
+                className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              />
+              <span className="text-[10px] text-slate-400 mt-0.5 block">
+                Limits the number of generated video scenes per generation request.
+              </span>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                Max Duration Per Scene (4–8 seconds)
+              </label>
+              <input
+                type="number"
+                min="4"
+                max="8"
+                value={settings.maxDurationPerScene ?? 5}
+                onChange={(e) => setSettings({ ...settings, maxDurationPerScene: parseInt(e.target.value, 10) || 5 })}
+                className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              />
+              <span className="text-[10px] text-slate-400 mt-0.5 block">
+                Google Veo 3.1 API strictly requires durations between 4 and 8 seconds.
+              </span>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                Estimated Budget Ceiling ($ USD per request)
+              </label>
+              <input
+                type="number"
+                step="0.05"
+                min="0.10"
+                value={settings.maxCostPerRequest ?? 1.50}
+                onChange={(e) => setSettings({ ...settings, maxCostPerRequest: parseFloat(e.target.value) || 0.1 })}
+                className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              />
+              <span className="text-[10px] text-slate-400 mt-0.5 block">
+                Requests exceeding this pre-flight estimate are rejected before invoking paid APIs.
+              </span>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1">
+                Configured Model Rate ($ USD per second)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={settings.veoPricePerSecond ?? 0.15}
+                onChange={(e) => setSettings({ ...settings, veoPricePerSecond: parseFloat(e.target.value) || 0.15 })}
+                className="w-full bg-dark-900 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+              />
+              <span className="text-[10px] text-amber-400/80 mt-0.5 block">
+                *Disclosed limitation: Pricing is an estimate based on published rates ($0.15/s) and cannot guarantee actual final provider billing.
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-white/5">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="strictVideoModeToggle"
+                checked={settings.strictVideoMode ?? true}
+                onChange={(e) => setSettings({ ...settings, strictVideoMode: e.target.checked })}
+                className="w-4 h-4 mt-0.5 accent-amber-500 rounded cursor-pointer"
+              />
+              <div>
+                <label htmlFor="strictVideoModeToggle" className="text-xs font-semibold text-white cursor-pointer">
+                  Strict Video Mode (Reject silent slideshow image fallback)
+                </label>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  When enabled, generation immediately stops and displays a clear error if Veo video generation fails (e.g. quota limits or billing unconfigured), ensuring you never receive still image slideshows in place of real video.
+                </p>
+              </div>
             </div>
           </div>
         </div>

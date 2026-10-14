@@ -65,4 +65,9 @@ export interface AppSettings {
   defaultResolution: string;
   defaultFps: number;
   enableAiMockFallback: boolean;
+  maxScenesPerRequest?: number;
+  maxDurationPerScene?: number;
+  maxCostPerRequest?: number;
+  veoPricePerSecond?: number;
+  strictVideoMode?: boolean;
 }
